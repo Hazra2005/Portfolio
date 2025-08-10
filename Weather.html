@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <style>
+    body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: linear-gradient(to right, #74ebd5, #ACB6E5);
+  color: #333;
+}
+
+header {
+  text-align: center;
+  padding: 20px;
+  color: white;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+}
+
+#search-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#city-input {
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  outline: none;
+  width: 250px;
+}
+
+#search-btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  background: #333;
+  color: white;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#search-btn:hover {
+  background: #555;
+}
+
+.weather-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.current-weather {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.current-weather img {
+  width: 90px;
+}
+
+.hourly h2, .daily h2 {
+  margin-bottom: 10px;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.forecast-card {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, background 0.3s;
+}
+
+.forecast-card:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.forecast-card img {
+  width: 50px;
+}
+
+@media (max-width: 600px) {
+  #city-input {
+    width: 180px;
+  }
+}
+.forecast-card p:last-child {
+  color: #0077cc;
+  font-weight: bold;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Weather App</h1>
+  </header>
+  <div id="search-box">
+    <input type="text" id="city-input" placeholder="Enter city" />
+    <button id="search-btn">Search</button>
+  </div>
+  <div class="weather-container">
+    <div class="current-weather" id="current-weather"></div>
+    <div class="hourly">
+      <h2>Next 5 Hours</h2>
+      <div class="forecast-grid" id="hourly-forecast"></div>
+    </div>
+    <div class="daily">
+      <h2>Next 5 Days</h2>
+      <div class="forecast-grid" id="daily-forecast"></div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "2afc5b10d49b4368996140102251008"; // Paste your WeatherAPI key here
+
+    document.getElementById("search-btn").addEventListener("click", () => {
+      const city = document.getElementById("city-input").value;
+      if (city) {
+        getWeather(city);
+      }
+    });
+
+    async function getWeather(city) {
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=5&aqi=no&alerts=no`);
+      const data = await res.json();
+      displayCurrentWeather(data);
+      displayHourly(data);
+      displayDaily(data);
+    }
+
+    function displayCurrentWeather(data) {
+      const container = document.getElementById("current-weather");
+      container.innerHTML = `
+        <h2>${data.location.name}, ${data.location.country}</h2>
+        <img src="https:${data.current.condition.icon}" alt="">
+        <p>${data.current.temp_c}°C - ${data.current.condition.text}</p>
+        <p>Feels like: ${data.current.feelslike_c}°C</p>
+        <p>Humidity: ${data.current.humidity}% | Wind: ${data.current.wind_kph} kph</p>
+      `;
+    }
+
+   function displayHourly(data) {
+  const container = document.getElementById("hourly-forecast");
+  container.innerHTML = "";
+  const hours = data.forecast.forecastday[0].hour;
+  const currentHour = new Date().getHours();
+  const next12 = hours.slice(currentHour, currentHour + 12);
+  next12.forEach(hour => {
+    container.innerHTML += `
+      <div class="forecast-card">
+        <p>${hour.time.split(" ")[1]}</p>
+        <img src="https:${hour.condition.icon}" alt="">
+        <p>${hour.temp_c}°C</p>
+        <p>Rain: ${hour.chance_of_rain}%</p>
+      </div>
+    `;
+  });
+}
+
+
+function displayDaily(data) {
+  const container = document.getElementById("daily-forecast");
+  container.innerHTML = "";
+  data.forecast.forecastday.forEach(day => {
+    container.innerHTML += `
+      <div class="forecast-card">
+        <p>${day.date}</p>
+        <img src="https:${day.day.condition.icon}" alt="">
+        <p>${day.day.avgtemp_c}°C</p>
+        <p>Rain: ${day.day.daily_chance_of_rain}%</p>
+      </div>
+    `;
+  });
+}
+
+  </script>
+</body>
+</html>
