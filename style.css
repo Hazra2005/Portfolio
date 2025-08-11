@@ -282,3 +282,30 @@ footer p {
     box-shadow: 0 0 40px rgba(255, 65, 108, 0.8), 0 0 80px rgba(255, 75, 43, 0.6);
   }
 }
+
+footer {
+  position: relative;
+}
+
+.footer-logos {
+  position: relative;
+  z-index: 1; /* Bring logos above the blur layer */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.footer-logos img {
+  height: 80px; /* Slightly bigger for clarity */
+  width: auto;
+  filter: none !important; /* Remove inherited blur */
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast; /* Sharper in WebKit browsers */
+}
+
+}
+.footer-logos img:hover {
+  transform: scale(1.05);
+  animation: none;
+}
